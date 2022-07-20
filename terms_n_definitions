@@ -1,0 +1,144 @@
+C interview Questions:
+==========================================
+XOn / XOff Software Flow Control:
+  
+RTS / CTS Hardware Flow Control:
+
+What is Size of character, integer, integer pointer, character pointer?
+
+What is a NULL pointer and what is its use?
+
+Checking for a null pointer
+
+What is void pointer and what is its use?
+
+What is ISR?
+
+What is return type of ISR?
+
+What is interrupt latency?
+
+How to measure interrupt latency
+
+How to reduce interrupt latency?
+
+Can we use any function inside ISR?
+
+Can we use printf inside ISR?
+
+What is thread safety?
+
+Can we put breakpoint inside ISR?
+
+Is Count_Down_to_Zero Loop better than Count_Up_Loops?
+
+Can static variables be declared in a header file?
+
+What are inline functions?
+
+Static Variables in C
+
+What are the uses of the keyword static?
+
+Can include files be nested?
+
+What are the uses of the keyword volatile?
+
+What is Top half & bottom half of a kernel?
+
+What is RTOS?
+
+Context switch
+
+Kernel Preemption
+
+What type of scheduling is there in RTOS?
+
+What is the difference between hard real-time and soft real-time OS?
+
+"Difference between RISC and CISC processor.
+
+What is priority inversion?
+
+What is priority inheritance?
+
+How many types of IPC mechanism you know?
+
+What is semaphore?
+
+What is spin lock?
+
+What is difference between binary semaphore and mutex?
+
+What is virtual memory?
+
+What is kernel paging?
+
+Can structures be passed to the functions by value?
+"Why cannot arrays be passed by values to functions?
+"
+"Advantages and disadvantages of using macro and inline functions?
+"
+# and ## operators
+Stringizing operator (#)
+Token-pasting operator (##)
+Inline function in C
+Macro function in C
+"What happens when recursive functions are declared inline?
+"
+++*ip increments what?
+Declare a manifest constant that returns the number of seconds in a year using preprocessor? Disregard leap years in your answer.
+Using the variable a, write down definitions for the following:
+
+"Consider the two statements and point out which one is preferred and why?
+"
+What will be the output of the following code fragment?
+puts() function in C
+"What is purpose of keyword const?
+"
+What do the following declarations mean?
+How to decide whether given processor is using little endian format or big endian format ?
+What is the concatenation operator?
+Infinite loops often arise in embedded systems. How do you code an infinite loop in C?
+Guess the output:
+What is forward referencing w.r.t. pointers in C?
+
+"How is a generic list manipulation function written which accepts elements of any kind?
+"
+"How can you define a structure with bit field members?
+"
+How do you write a function which takes 2 arguments - a byte and a field in the byte and returns the value of the field in that byte?
+Which parameters decide the size of data type for a processor ?
+"What is job of preprocessor, compiler, assembler and linker ?
+"
+"What is the difference between static linking and dynamic linking?
+"
+What is the purpose of the preprocessor directive #error?
+On a certain project it is required to set an integer variable at the absolute address 0x67a9 to the value 0xaa55. The compiler is a pure ANSI compiler. Write code to accomplish this task.
+"Significance of watchdog timer in Embedded Systems.
+
+Why ++n executes faster than n+1?
+
+
+What is wild pointer?
+
+What is dangling pointer?
+
+Write down the equivalent pointer expression for referring the same element a[i][j][k][l] ?
+
+Which bit wise operator is suitable for checking whether a particular bit is on or off?
+
+When should we use register modifier?
+
+Why doesn't the following statement work?
+
+Predict the output or error(s) for the following program:
+
+Guess the output:
+
+Write a code fragment to set and clear only bit 3 of an integer.
+
+What is wrong with this code?
+
+Is the code fragment given below is correct? If so what is the output?
+
