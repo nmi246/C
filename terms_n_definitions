@@ -1,61 +1,145 @@
 C interview Questions:
 ==========================================
 XOn / XOff Software Flow Control:
+- It can only be used in character oriented data transmisions (not binary transfer) as it relies on the use of a pre-determined XOn character and a pre-determined XOff character. The basic idea is simple, when the receiver buffer fills to the point it cannot receive anymore data it issues an XOff (Transmit Off) to the transmitter. When the transmitter sees the XOff character, it stops transmitting. It will only resume once it sees a corresponding XOn. The disadvantage of such a system is that should an issued character become damaged in transit no action will be taken by the transmitter.
   
 RTS / CTS Hardware Flow Control:
+- RTS / CTS Flow Control is another flow control mechanism that is part of the RS232 standard.
+- It makes use of two further pins on the RS232 connector, RTS (Request to Send) and CTS (Clear to Send). These two lines allow the receiver and the transmitter to alert each other to their state. A transmitter raises its RTS line, which causes an interrupt on the receiver, i.e - hey can I send some data?. If the receiver is in a position to receive the data it will assert its CTS line, i.e - yes you can start sending. The raising and lowering of these lines allows device drivers which implement hardware flow control code to maintain a reliable data connection between transmitter and receiver. The advantage to this approach is that damaged data in transit does not effect the flow control mechanism (as in XOn / XOff).
+
 
 What is Size of character, integer, integer pointer, character pointer?
+- The sizeof character is 1 byte.
+- Size of integer is 4 bytes.
+- Size of integer pointer / character pointer is 8 bytes on 64 bit machine and 4 bytes on 32 bit machine.
+
 
 What is a NULL pointer and what is its use?
+- The NULL is a macro defined in C.
+- It is always a good practice to assign the pointer NULL to a pointer variable in case you do not have exact address to be assigned. This is done at the time of variable declaration. A pointer that is assigned NULL is called a null pointer.
+- On most of the operating systems, programs are not permitted to access memory at address 0 because that memory is reserved by the operating system. However, the memory address 0 has special significance; it signals that the pointer is not intended to point to an accessible memory location. But by convention, if a pointer contains the null (zero) value, it is assumed to point to nothing.
+- Thus, if all unused pointers are given the NULL value and you avoid the use of a null pointer, you can avoid the accidental misuse of an uninitialized pointer. Many times, uninitialized variables hold some junk values and it becomes difficult to debug the program."
 
-Checking for a null pointer
+How do you check for a null pointer
+- if(ptr)     // succeeds if p is not null
+- if(!ptr)    // succeeds if p is nul
 
 What is void pointer and what is its use?
+- The void pointer, also known as the generic pointer, is a special type of pointer that can be pointed at objects of any data type! A void pointer is declared like a normal pointer, using the void keyword as the pointer’s type.
+- However, because the void pointer does not know what type of object it is pointing to, it cannot be dereferenced directly! Rather, the void pointer must first be explicitly cast to another pointer type before it is dereferenced."
+
 
 What is ISR?
+- An ISR(Interrupt Service Routine) is an interrupt handler, a callback subroutine which is called when a interrupt is encountered.
 
-What is return type of ISR?
+What is the return type of ISR?
+- ISR does not return anything; because there is no caller in the code to read the returned values.
+
 
 What is interrupt latency?
+- Interrupt latency is the time from the assertion of a hardware interrupt until the first instruction of the device driver's interrupt handler is executed.
+- The term interrupt latency refers to the delay from the start of the interrupt request to the start of interrupt handler execution.
+- (insert image here)
 
 How to measure interrupt latency
+- By connecting one input of the oscilloscope (or logic state analyser) to the INTR pin of the microprocessor and the second one to the port you activate/desactivate, you can measure the latency time and the duration of the ISR.
+
 
 How to reduce interrupt latency?
+- Interrupt latency can be minimized by writing short ISR routine and by not delaying interrupts for more time.
 
-Can we use any function inside ISR?
 
-Can we use printf inside ISR?
+Can we use any function inside an ISR?
+- We can use function inside ISR as long as that function is not invoked from other portion of the code.
+
+
+Can we use printf() inside ISR?
+- "Printf function in ISR is not supported because printf function is not reentrant, thread safe and uses dynamic memory allocation which takes a lot of time and can affect the speed of an ISR up to a great extent.
+- The library code for printf() is large (about 1kb) and slow to execute. This will dramatically affect the performance of your ISR and therefore your application. In addition it may adversely affect the behavior of your application.
+- If you wish to display state information then you have other options. For example changing the state of I/O pins or (if you are using tScope) putting the state in an xdata variable and watching the value."
+
 
 What is thread safety?
+- Thread safety is a computer programming concept applicable in the context of multi-threaded programs. A piece of code is thread-safe if it functions correctly during simultaneous execution by multiple threads. In particular, it must satisfy the need for multiple threads to access the same shared data, and the need for a shared piece of data to be accessed by only one thread at any given time. There are a few ways to achieve thread safety:
+- "Re-entrancy: Writing code in such a way that it can be partially executed by one task, reentered by another task, and then resumed from the original task. This requires the saving of state information in variables local to each task, usually on its stack, instead of in static or global variables."
+- Mutual exclusion: Access to shared data is serialized using mechanisms that ensure only one thread reads or writes the shared data at any time. Great care is required if a piece of code accesses multiple shared pieces of data—problems include race conditions, deadlocks, livelocks, starvation, and various other ills enumerated in many operating systems textbooks."
+- Thread-local storage: Variables are localized so that each thread has its own private copy. These variables retain their values across subroutine and other code boundaries, and are thread-safe since they are local to each thread, even though the code which accesses them might be reentrant."
+- Atomic operations: Shared data are accessed by using atomic operations which cannot be interrupted by other threads. This usually requires using special machine language instructions, which might be available in a runtime library. Since the operations are atomic, the shared data are always kept in a valid state, no matter what other threads access it. Atomic operations form the basis of many thread locking mechanisms."
+
 
 Can we put breakpoint inside ISR?
+- Putting a break point inside ISR is not a good idea because debugging will take some time and a difference of half or more second will lead to different behavior of hardware. To debug ISR, definitive logs are better.
+
 
 Is Count_Down_to_Zero Loop better than Count_Up_Loops?
+- Count down to zero loops are better. Reason behind this is that at loop termination, comparison to zero can be optimized by the compiler. Most processors have instruction for comparing to zero. So they don't need to load the loop variable and the maximum value, subtract them and then compare to zero. That is why count down to zero loop is better.
+
+- So it is not because of counting down or up.. But because of how your code will be translated into machine code..
+
+- So counting from 10 to 100 is the same as counting form 100 to 10
+- But counting from i=100 to 0 is faster than from i=0 to 100 in most cases
+- And counting from i=N to 0 is faster than from i=0 to N
+
+- Note that nowadays compilers may do this optimization for you (if it is smart enough)."
+
 
 Can static variables be declared in a header file?
+- A static variable cannot be declared without defining it. A static variable can be defined in the header file. But doing so will result in a private copy of that variable in each source file which includes the header file. So it will be wise not to declare a static variable in header file, unless you are dealing with a different scenario.
+
 
 What are inline functions?
+- The ARM compilers support inline functions with the keyword __inline. These functions have a small definition and the function body is substituted in each call to the inline function. The argument passing and stack maintenance is skipped and it results in faster code execution, but it increases code size, particularly if the inline function is large or one inline function is used often.
 
-Static Variables in C
+Static Variables in C:
+- Static variables have a property of preserving their value even after they are out of their scope! Hence, static variables preserve their previous value in their previous scope and are not initialized again in the new scope.
+- Syntax:
+- static data_type var_name = var_value;"
+
+1) A static int variable remains in memory while the program is running. A normal or auto variable is destroyed when a function call where the variable was declared is over.
+- E.g., we can use static int to count number of times a function is called. An auto variable can’t be used for this purpose."
+2) Static variables are allocated memory in data segment, not stack segment.
+3) Static variables (like global variables) are initialized as 0 if not initialized explicitly. For example in the following program, the value of x is printed as 0, while value of y is something garbage.
+4) In C, static variables can only be initialized using constant literals. For example, the following program fails in compilation.
+5) Static global variables and functions are also possible in C/C++. The purpose of these is to limit scope of a variable or function to a file.
+
 
 What are the uses of the keyword static?
+- Static keyword can be used with variables as well as functions. A variable declared static will be of static storage class and within a function, it maintains its value between calls to that function. A variable declared as static within a file, scope of that variable will be within that file, but it can't be accessed by other files.
+- Functions declared static within a module can be accessed by other functions within that module. That is, the scope of the function is localized to the module within which it is declared."
+
 
 Can include files be nested?
+- "Yes. Include files can be nested any number of times. But you have to make sure that you are not including the same file twice. 
+- In the past, nesting header files was seen as bad programming practice, because it complicates the dependency tracking function of the MAKE program and thus slows down compilation. Many of todays popular compilers make up for this difficulty by implementing a concept called precompiled headers, in which all headers and associated dependencies are stored in a precompiled state.
+- There is no limit to how many header files that can be included. But the number can be compiler dependent, since including multiple header files may cause your computer to run out of stack memory."
+
 
 What are the uses of the keyword volatile?
+- In programming, particularly in the C, C++, C#, and Java, the volatile keyword indicates that a value may change between different accesses, even if it does not appear to be modified. This keyword prevents an optimizing compiler from optimizing away subsequent reads or writes and thus incorrectly reusing a stale value or omitting writes.
+
 
 What is Top half & bottom half of a kernel?
+- Sometimes to handle an interrupt, a substantial amount of work has to be done. But it conflicts with the speed needed for an interrupt handler. To handle this situation, Linux splits the handler into two parts – Top half and Bottom half. The top half is the routine that actually responds to the interrupt. The bottom half on the other hand is a routine that is scheduled by the upper half to be executed later at a safer time.
+- All interrupts are enabled during execution of the bottom half. The top half saves the device data into the specific buffer, schedules bottom half and exits. The bottom half does the rest. This way the top half can service a new interrupt while the bottom half is working on the previous."
 
 What is RTOS?
-
-Context switch
-
-Kernel Preemption
+- "In an OS, there is a module called the scheduler, which schedules different tasks and determines when a process will execute on the processor. This way, multi-tasking is achieved. The scheduler in an RTOS is designed to provide a predictable execution pattern. In an embedded system, a certain event must be executed in a strictly defined time.
+- To meet real time requirements, the behaviour of the scheduler must be predictable. The features of an RTOS are:
+  - Context switching latency should be short.
+  - Interrupt latency should be short.
+  - Interrupt dispatch latency should be short.
+  - Reliable and time bound inter process mechanisms.
+  - Should support kernel pre-emption."
+- Context switch: The process of storing the state of a process or of a thread, so that it can be restored and execution resumed from the same point later; allows multiple processes to share a single CPU; an essential feature of a multitasking OS.
+- Kernel Preemption: The act of temporarily interrupting a task being carried out by a computer system, without requiring its cooperation, and with the intention of resuming the task at a later time.
 
 What type of scheduling is there in RTOS?
+- pre-emptive scheduling: in pre-emptive scheduling, the higher priority task can interrupt a running process and the interrupted process will be resumed later.
+
 
 What is the difference between hard real-time and soft real-time OS?
-
+-
+--------------------------------------------------------------------------------------------------------------------------------
 "Difference between RISC and CISC processor.
 
 What is priority inversion?
@@ -141,4 +225,358 @@ Write a code fragment to set and clear only bit 3 of an integer.
 What is wrong with this code?
 
 Is the code fragment given below is correct? If so what is the output?
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+What type of scheduling is there in RTOS?
+RTOS uses pre-emptive scheduling. In pre-emptive scheduling, the higher priority task can interrupt a running process and the interrupted process will be resumed later.
+
+What is the difference between hard real-time and soft real-time OS?
+- A Hard real-time system strictly adheres to the deadline associated with the task. If the system fails to meet the deadline, even once, the system is considered to have failed. 
+- In case of a soft real-time system, missing a deadline is acceptable. In this type of system, a critical real-time task gets priority over other tasks and retains that priority until it completes.
+
+RISC processor
+- RISC (Reduced Instruction Set Computer) could carry out a few sets of simple instructions simultaneously. Fewer transistors are used to manufacture RISC, which makes RISC cheaper. RISC has uniform instruction set and those instructions are also fewer in number. Due to the less number of instructions as well as instructions being simple, the RISC computers are faster. RISC emphasise on software rather than hardware. RISC can execute instructions in one machine cycle.
+- CISC processor	CISC (Complex Instruction Set Computer) is capable of executing multiple operations through a single instruction. CISC have rich and complex instruction set and more number of addressing modes. CISC emphasise on hardware rather that software, making it costlier than RISC. It has a small code size, high cycles per second and it is slower compared to RISC.
+
+What is priority inversion?	
+- If two tasks share a resource, the one with higher priority will run first. However, if the lower-priority task is using the shared resource when the higher-priority task becomes ready, then the higher-priority task must wait for the lower-priority task to finish. In this scenario, even though the task has higher priority it needs to wait for the completion of the lower-priority task with the shared resource. This is called priority inversion.
+
+What is priority inheritance?
+- Priority inheritance is a method for eliminating unbounded priority inversion. Using this programming method, a process scheduling algorithm increases the priority of a process (A) to the maximum priority of any other process waiting for any resource on which A has a resource lock (if it is higher than the original priority of A).
+
+The basic idea of the priority inheritance protocol is that when a job blocks one or more high-priority jobs, it ignores its original priority assignment and executes its critical section at an elevated priority level. After executing its critical section and releasing its locks, the process returns to its original priority level."
+How many types of IPC mechanism you know?	"Different types of inter-process communicatio (IPC) mechanism:
+- Pipes
+- Named pipes or FIFO 
+- Semaphores
+- Shared memory
+- Message queue
+- Socket"
+
+What is semaphore?	"Semaphore is actually a variable or abstract data type which controls access to a common resource between multiple processes. There's 2 types:
+- binary semaphore: It can have only two values (0 and 1). The semaphore value is set to 1 by the process in charge, when the resource is available.
+- counting semaphore: It can have value greater than one. It is used to control access to a pool of resources."
+
+What is a spinlock?	A spinlock is a lock that causes a thread trying to acquire it to simply wait in a loop ("spin") while repeatedly checking whether the lock is available. Since the thread remains active but is not performing a useful task, the use of such a lock is a kind of busy waiting.
+
+What is difference between binary semaphore and mutex?	"The differences between binary semaphore and mutex are as follows:
+
+- Mutual exclusion and synchronization can be used by binary semaphore while mutex is used only for mutual exclusion.
+- A mutex can be released by the same thread which acquired it. Semaphore values can be changed by other thread also.
+- From an ISR, a mutex can not be used.
+- The advantage of semaphores is that, they can be used to synchronize two unrelated processes trying to access the same resource.
+- Semaphores can act as mutex, but the opposite is not possible."
+
+What is virtual memory?
+"	Virtual memory is a technique that allows processes to allocate memory in case of physical memory shortage using automatic storage allocation upon a request. The advantage of the virtual memory is that the program can have a larger memory than the physical memory. It allows large virtual memory to be provided when only a smaller physical memory is available. Virtual memory can be implemented using paging.
+	Virtual memory combines active RAM and inactive memory on DASD to form a large range of contiguous addresses. DASD = direct access storage device. 
+
+What is kernel paging?	Paging is a memory management scheme by which computers can store and retrieve data from the secondary storage when needed into main memory. In this scheme, the OS retrieves data from secondary storage in same-size blocks called pages. The paging scheme allows the physical address space of a process to be non continuous. Paging allows OS' to use secondary storage for data that does not fit entirely into physical memory.
+	Paging is an important part of virtual memory implementations in modern operating systems, using secondary storage to let programs exceed the size of available physical memory.
+
+Can structures be passed to functions by value?	"Passing structures by value to a function is possible, but bad practice. 
+- if we pass the struct by value and the function changes some of those values, then the value change is not reflected in original function. 
+- if the struct is big, passing the struct by value means copying the whole structure to the function argument stack which can slow the program significantly."
+
+Why can't arrays be passed by value to functions?
+"	In C, the array name itself represents the address of the first element. So, even if we pass the array name as argument, it will be passed as reference and not its address.
+
+Advantages and disadvantages of using macro and inline functions?
+"	The advantage of the macro and inline function is that the overhead for argument passing and stuff is reduced as the function are in-lined. The advantage of macro function is that we can write type insensitive functions. It is also the disadvantage of macro function as macro functions can't do validation check. The macro and inline function also increases the size of the executable.
+
+what are the # and ## operators:	"Question:
+#define cat(x,y) x##y concatenates x to y. But cat(cat(1,2),3) does not expand but gives preprocessor warning. Why?
+
+The cat(x, y) expands to x##y. It just pastes x and y. But in case of cat(cat(1,2),3), it expands to cat(1,2)##3 instead of 1##2##3. That is why it is giving preprocessor warning."
+
+Stringizing operator (#)	"This operator causes the corresponding actual argument to be enclosed in double quotation marks. The # operator, which is generally called the stringize operator, turns the argument it precedes into a quoted string.
+
+Token-pasting operator (##)	"Allows tokens used as actual arguments to be concatenated to form other tokens. It is often useful to merge two tokens into one while expanding macros. This is called token pasting or token concatenation. The ‘##’ pre-processing operator performs token pasting. When a macro is expanded, the two tokens on either side of each ‘##’ operator are combined into a single token, which then replaces the ‘##’ and the two original tokens in the macro expansion.
+
+What is an inline function in C?
+- Inline Function are those function whose definitions are small and can be substituted at the place where its function call hapens. Function substitution is totally compiler choice.
+
+Macro function in C	Example:
+
+What happens when recursive functions are declared inline?
+- Inlining an recursive function reduces the overhead of saving context on stack. But, inline is merely a suggestion to the compiler and it does not guarantee that a function will be inlined. Obviously, the compiler won't be able to inline a recursive function infinitely. It may not inline it at all or it may inline it, just a few levels deep.
+
+++*p increments what?	
+- It increments the value to which p points to and not the address.
+
+Declare a manifest constant that returns the number of seconds in a year using preprocessor? Disregard leap years in your answer.	"The correct answer will be:
+
+#define SECONDS_IN_YEAR (60UL * 60UL * 24UL * 365UL)
+Do not forget to use UL, since the output will be very big integer."
+
+Using the variable a, write down definitions for the following:	"Using the variable a, write down definitions for the following:
+1 - An integer
+2 - A pointer to an integer
+3 - A pointer to a pointer to an integer
+4 - An array of ten integers
+5 - An array of ten pointers to integers
+6 - A pointer to an array of ten integers
+7 - A pointer to a function that takes an integer as an argument and returns an integer
+8 - Pass an array of ten pointers to a function that take an integer argument and return an integer."
+
+Consider the two statements and point out which one is preferred and why?
+- #define B struct A *
+- typedef struct A * C;
+- The typedef is preferred. Both statements declare pointer to struct A to something else and in one glance both looks fine. But there is one issue with the define statement. Consider a situation where we want to declare p1 and p2 as pointer to struct A. We can do this by
+- C p1, p2;
+- But doing B p1, p2, it will be expanded to struct A * p1, p2. It means that p1 is a pointer to struct A but p2 is a variable of struct A and not a pointer."
+
+
+What will be the output of the following code fragment?	"char *ptr; 
+if ((ptr = (char *)malloc(0)) == NULL) {
+   puts(""Got a null pointer""); 
+}
+else {
+   puts(""Got a valid pointer"");
+}
+The output will be “Got a valid pointer”. It is because malloc(0) returns a valid pointer, but it allocates size 0. So this pointer is of no use, but we can use this free pointer and the program will not crash."
+
+
+puts() function in C	"The C library function int puts(const char *str) writes a string to stdout up to but not including the null character. A newline character is appended to the output.
+
+Parameters:
+str − This is the C string to be written.
+
+Return Value:
+If successful, non-negative value is returned. On error, the function returns EOF."
+
+What is the purpose of the keyword const?
+- The const keyword when used in C means that the value of the variable will not be changed. But the value of the variable can be changed using a pointer. The const identifier can be used like this:
+
+const int a; or int const a;
+Both means the same and indicates that it is a constant integer. But if we declare something like this:
+const int *p
+
+then it does not mean that the pointer is constant but rather it is pointing to an constant integer. The declaration of an const pointer to a non-constant integer will look like this:
+int * const p;"
+
+
+What do the following declarations mean?
+- const int a; 
+- int const a; 
+- const int *a; 
+- int * const a; 
+- int const * a const;"
+
+- How to decide whether given processor is using little endian format or big endian format ?	"The following program can find out the endianness of the processor.
+#include<stdio.h>
+main (){
+ union Test
+ {
+    unsigned int i;
+    unsigned char c[2];
+ };
+ union Test a = {300};
+ if((a.c [0] == 1) &&  (a.c [1] == 44))
+ {
+    printf (""BIG ENDIAN\n"");
+ }
+ else
+ {
+    printf (""LITTLE ENDIAN\n"");
+ }
+}"
+
+
+What is the concatenation operator?	"The Concatenation operator (##) in macro is used to concatenate two arguments. Literally, we can say that the arguments are concatenated, but actually their value are not concatenated. Think it this way, if we pass A and B to a macro which uses ## to concatenate those two, then the result will be AB. Consider the example to clear the confusion-
+#define SOME_MACRO(a, b) a##b
+main(){
+  int var = 15;
+  printf(“%d”, SOME_MACRO(v, ar));
+}
+Output of the above program will be 15."
+
+
+
+Infinite loops often arise in embedded systems. How do you code an infinite loop in C?	"There are several ways to code an infinite loop:
+while(1){ }, 
+for(;;){ }, 
+
+Loop:
+// body statements.  
+goto Loop
+
+Many programmers prefer the 1st solution. It's easy to read and self-explanatory, unlike the 2nd or last."
+
+
+Guess the output:	"main(){
+  fork();
+  fork();
+  fork();
+  printf(""hello world\n"");
+}
+It will print “hello world' 8 times. The main() will print one time and creates 3 children, let us say Child_1, Child_2, Child_3. All of them printed once. The Child_3 will not create any child. Child2 will create one child and that child will print once. Child_1 will create two children, say Child_4 and Child_5 and each of them will print once. Child_4 will again create another child and that child will print one time. A total of eight times the printf statement will be executed."
+
+
+
+What is forward referencing a pointer in C?
+"	"Forward Referencing with respect to pointers is used when a pointer is declared and compiler reserves the memory for the pointer, but the variable or data type is not defined to which the pointer points to. For example 
+
+struct A *p; 
+struct A
+{
+// members
+};"
+
+
+How is a generic list manipulation function written which accepts elements of any kind?
+"	"It can be achieved using void pointer. A list may be expressed by a structure as shown below
+
+typedef struct 
+{
+ node *next;
+ /* data part */
+ ......
+}node;
+Assuming that the generic list may be like this 
+
+typedef struct 
+{
+ node *next;
+ void *data;
+}node;
+This way, the generic manipulation function can work on this type of structures."
+
+
+How can you define a structure with bit field members?
+Bit field members can be declared as shown below
+struct A {
+ char c1 : 3;
+ char c2 : 4;
+ char c3 : 1;
+};
+Here c1, c2 and c3 are members of a structure with width 3, 4, and 1 bit respectively. The ':' indicates that they are bit fields and the following numbers indicates the width in bits."
+How do you write a function which takes 2 arguments - a byte and a field in the byte and returns the value of the field in that byte?	"The function will look like this:
+
+int GetFieldValue(int byte, int field )
+{
+  byte = byte >> field;
+  byte = byte & 0x01;
+  return byte;
+}
+The byte is right shifted exactly n times where n is same as the field value. That way, our intended value ends up in the 0th bit position. ""Bitwise And"" with 1 can get the intended value. The function then returns the intended value."
+Which parameters decide the size of data type for a processor ?	Actually, compiler is the one responsible for size of the data type. But it is true as long as OS allows that. If it is not allowable by OS, OS can force the size.
+
+
+What is job of the preprocessor, compiler, assembler, and linker ?
+- The preprocessor commands are processed and expanded by the preprocessor before actual compilation. 
+- After preprocessing, the compiler takes the output of the preprocessor and the source code, and generates assembly code. 
+- Once compiler completes its work, the assembler takes the assembly code and produces an assembly listing with offsets and generate object files.
+- The linker combines object files or libraries and produces a single executable file. It also resolves references to external symbols, assigns final addresses to functions and variables, and revises code and data to reflect new addresses."
+
+What is the difference between static linking and dynamic linking?
+- In static linking, all the library modules used in the program are placed in the final executable file making it larger in size. This is done by the linker. If the modules used in the program are modified after linking, then re-compilation is needed. The advantage of static linking is that the modules are present in an executable file. We don't want to worry about compatibility issues.
+- In case of dynamic linking, only the names of the module used are present in the executable file and the actual linking is done at run time when the program and the library modules both are present in the memory. That is why, the executables are smaller in size. Modification of the library modules used does not force re-compilation. But dynamic linking may face compatibility issues with the library modules used."
+
+
+What is the purpose of the preprocessor directive #error?	"Preprocessor error is used to throw a error message during compile time. We can check the sanity of the make file and using debug options given below
+#ifndef DEBUG
+#ifndef RELEASE
+#error Include DEBUG or RELEASE in the makefile
+#endif
+#endif
+
+
+On a certain project it is required to set an integer variable at the absolute address 0x67a9 to the value 0xaa55. The compiler is a pure ANSI compiler. Write code to accomplish this task.	"This can be achieved by the following code fragment:
+int *ptr; 
+ptr = (int *)0x67a9; 
+*ptr = 0xaa55;"
+
+What is the significance of watchdog timer in Embedded Systems?
+- The watchdog timer is a timing device with a predefined time interval. During that interval, some event may occur or else the device generates a time out signal. It is used to reset to the original state whenever some inappropriate events take place which can result in system malfunction. It is usually operated by counter devices.
+
+Why does ++n execute faster than n+1?
+- The expression ++n requires a single machine instruction such as INR to carry out the increment operation. In case of n+1, apart from INR, other instructions are required to load the value of n. That is why ++n is faster.
+
+What is wild pointer?	
+- A pointer that is not initialized to any valid address or NULL is considered as wild pointer. Consider the following code fragment -
+
+int *p;
+*p = 20;
+Here p is not initialized to any valid address and still we are trying to access the address. The p will get any garbage location and the next statement will corrupt that memory location."
+
+What is dangling pointer?	If a pointer is de-allocated or freed and the pointer is not assigned to NULL, then it may still contain that address and accessing the pointer means that we are trying to access that location and it will give an error. This type of pointer is called dangling pointer.
+
+Write down the equivalent pointer expression for referring the same element a[i][j][k][l] ?	"We know that a[i] can be written as *(a+i). Same way, the array elements can be written like pointer expression as follows -
+
+a[i][j] == *(*(a+i)+j)
+a[i][j][k] == *(*(*(a+i)+j)+k)
+a[i][j][k][l] == *(*(*(*(a+i)+j)+k)+l)"
+"Which bit wise operator is suitable for checking whether a particular bit is on or off?
+"	"""Bitwise And"" (&) is used to check if any particular bit is set or not. To check whether 5'th bit is set we can write like this 
+
+bit = (byte >> 4) & 0x01;
+Here, shifting byte by 4 position means taking 5'th bit to first position and ""Bitwise And"" will get the value in 0 or 1."
+
+
+When should we use register modifier?	"The register modifier is used when a variable is expected to be heavily used and keeping it in the CPU’s registers will make the access faster.
+
+
+The keyword register hints to compiler that a given variable can be put in a register. It’s compiler’s choice to put it in a register or not. Generally, compilers themselves do optimizations and put the variables in register."
+	1) If you use & operator with a register variable then compiler may give an error or warning (depending on the compiler used), because when we say a variable is a register, it may be stored in a register instead of memory and accessing address of a register is invalid. See program (right).
+	2) register keyword can be used with pointer variables. Obviously, a register can have address of a memory location. There would not be any problem with the below program.
+	3) Register is a storage class, and C doesn’t allow multiple storage class specifiers for a variable. So, register can not be used with static . Try below program.
+	4) There is no limit on number of register variables in a C program, but the point is compiler may put some variables in register and some not.
+"Why doesn't the following statement work?
+"	"char str[ ] = ""Hello"" ;
+strcat (str, '!' ) ;
+The string function strcat( ) concatenates two strings. But here the second argument is '!', a character and that is the reason why the code doesn't work. To make it work, the code should be changed like this:
+
+strcat ( str, ""!"" );"
+Predict the output or error(s) for the following program:	"void main() {
+   int const * p = 5;
+   printf(""%d"",++(*p));
+}
+
+The above program will result in compilation error stating “Cannot modify a constant value”. Here p is a pointer to a constant integer. But in the next statement, we are trying to modify the value of that constant integer. It is not permissible in C and that is why it will give a compilation error."
+"Guess the output:
+"	"#include<stdio.h>
+main() {
+ unsigned int a = 2;
+ int b = -10;
+ (a + b > 0)?puts(""greater than 0""):puts(""less than 1"");
+}
+Output: greater than 0
+
+If you have guessed the answer wrong, then here is the explanation for you. a + b is -8, if we do the math. But here the addition is between different integral types - one is unsigned int and another is int. So, all the operands in this addition are promoted to unsigned integer type and b turns to a positive number and eventually a big one. The outcome of the result is obviously greater than 0 and hence, this is the output."
+"Write a code fragment to set and clear only bit 3 of an integer.
+"	"#define BIT(n) (0x1 << n)
+int a;
+void SetBit3()
+{
+   a |= BIT(3);
+}
+
+void ClearBit3()
+{
+   a &= ~BIT(3);
+}"
+
+
+What is wrong with this code?	"int square(volatile int *p) {
+   return *p * *p;
+}
+
+The intention of the above code is to return the square of the integer pointed by the pointer p. Since it is volatile, the value of the integer may have changed suddenly and will result in something else which will looks like the result of the multiplication of two different integers. To work as expected, the code needs to be modified like this. 
+
+int square(volatile int *p) {
+   int a = *p;
+   return a*a;
+}"
+"Is the code fragment given below is correct? If so what is the output?
+"	"int i = 2, j = 3, res;
+res = i+++j;
+
+The above code is correct, but a little bit confusing. It is better not to follow this type of coding style. The compiler will interpret above statement as “res = i++ + j”. So the res will get value 5 and i after this will be 3."
 
